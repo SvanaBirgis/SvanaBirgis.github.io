@@ -3,7 +3,7 @@
 var gl;
 var points;
 
-var NumPoints = 10000000;
+var NumPoints = 100;
 
 window.onload = function init()
 {
@@ -27,8 +27,8 @@ window.onload = function init()
     // Specify a starting point p for our iterations
     // p must lie inside any set of three vertices
 
-    var u = add( vertices[0], vertices[1] );
-    var v = add( vertices[0], vertices[2] );
+    var u = add( vec2(100,100), vec2(100,100) );
+    var v = add( vec2(100,100), vec2(100,100) );
     var p = scale( 0.25, add( u, v ) );
 
     // And, add our initial point into our array of points

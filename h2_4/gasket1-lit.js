@@ -7,7 +7,7 @@
 var gl;
 var points;
 
-var NumPoints = 10000;
+var NumTriangles = 100;
 var colorLoc;
 
 window.onload = function init()
@@ -23,11 +23,8 @@ window.onload = function init()
 
     // First, initialize the corners of our gasket with three points.
     
-    var vertices = [
-        vec2( -1, -1 ),
-        vec2(  0,  1 ),
-        vec2(  1, -1 )
-    ];
+    var vertices = new Float32Array([-0.5, -0.25, 0.5, -0.25, 
+        -0.5, 0.25, 0.5, 0.25]);
 
     // Specify a starting point p for our iterations
     // p must lie inside any set of three vertices
@@ -44,7 +41,7 @@ window.onload = function init()
     // Each new point is located midway between
     // last point and a randomly chosen vertex
 
-    for ( var i = 0; points.length < NumPoints; ++i ) {
+    for ( var i = 0; points.length < NumTriangles; ++i ) {
         var j = Math.floor(Math.random() * 3);
         p = add( points[i], vertices[j] );
         p = scale( 0.5, p );
@@ -86,10 +83,6 @@ function render() {
 
 	// Setjum litinn sem rauðann og teiknum helming punktanna
     gl.uniform4fv( colorLoc, vec4(1.0, 0.0, 0.0, 1.0) );
-    gl.drawArrays( gl.POINTS, 0, points.length/2 );
-
-	// Setjum litinn sem bláann og teiknum helming punktanna
-    gl.uniform4fv( colorLoc, vec4(0.0, 0.0, 1.0, 1.0) );
-    gl.drawArrays( gl.POINTS, points.length/2, points.length/2 );
+    gl.drawArrays( gl.TRIANGLES, 0, 6 );
 
 }

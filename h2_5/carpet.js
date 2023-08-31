@@ -21,20 +21,20 @@ window.onload = function init()
     // First, initialize the corners of our gasket with three points.
 
     var vertices = [
-        vec2( -1, -1 ),
-        vec2( -1,  1 ),
-        vec2(  1,  1 ),
-        vec2(  1, -1 )
+        vec2(-1, -1),
+        vec2(-1, 1),
+        vec2(1, 1),
+        vec2(1, -1)
     ];
 
-    divideTriangle( vertices[0], vertices[1], vertices[2], vertices[3],
+    divideSquare( vertices[0], vertices[1], vertices[2], vertices[3],
                     NumTimesToSubdivide);
 
     //
     //  Configure WebGL
     //
     gl.viewport( 0, 0, canvas.width, canvas.height );
-    gl.clearColor( 0.75, 1.0, 1.0, 1.0 );
+    gl.clearColor( 1.0, 1.0, 1.0, 1.0 );
 
     //  Load shaders and initialize attribute buffers
 
@@ -59,7 +59,8 @@ window.onload = function init()
 function square( a, b, c ,d)
 {
     points.push( a, b, c );
-    points.push( a, c, d );
+    points.push( b, c, d );
+    points.push( a, b, d );
 }
 
 function divideSquare( a, b, c, d, count )
@@ -74,23 +75,32 @@ function divideSquare( a, b, c, d, count )
 
         //bisect the sides
 
-        var midAB = mix(a, b, 0.5);
-        var midBC = mix(b, c, 0.5);
-        var midCD = mix(c, d, 0.5);
-        var midDA = mix(d, a, 0.5);
-        var center = mix(midAB, midCD, 0.5);
+        var AAB = mix(a, b, 1/3);
+        var ABB = mix(b, a, 1/3);
+        var BCC = mix(c, b, 1/3);
+        var BBC = mix(b, c, 1/3);
+        var CCD = mix(c, d, 1/3);
+        var CDD = mix(d, c, 1/3);
+        var DDA = mix(d, a, 1/3);
+        var DAA = mix(a, d, 1/3);
+        var AABCDD = mix(AAB, CDD, 1/3);
+        var ABBCCD = mix(ABB, CCD, 1/3);
+        var AABCDD2 = mix(CDD, AAB, 1/3);
+        var ABBCCD2 = mix(CCD, ABB, 1/3);
+
 
         --count;
 
-        // three new triangles
+        // átta nýjir kassar
 
-        divideSquare(a, midAB, center, midDA, count);
-        divideSquare(midAB, b, midBC, center, count);
-        divideSquare(center, midBC, c, midCD, count);
-        divideSquare(midDA, center, midCD, d, count);
-
-
-        divideSquare(midAB, midBC, midCD, midDA, count);
+        divideSquare(a, AAB, AABCDD, DAA, count);
+        divideSquare(AAB, ABB, ABBCCD, AABCDD, count);
+        divideSquare(b, BBC, ABBCCD, ABB, count);
+        divideSquare(BBC, BCC, ABBCCD2, ABBCCD, count);
+        divideSquare(c, CCD, ABBCCD2, BCC, count);
+        divideSquare(CCD, CDD, AABCDD2, ABBCCD2, count);
+        divideSquare(d, DDA, AABCDD2, CDD, count);
+        divideSquare(DAA, AABCDD, AABCDD2, DDA, count);
     }
 }
 

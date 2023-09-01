@@ -75,25 +75,25 @@ function divideSquare( a, b, c, d, count )
 
         //bisect the sides
 
-        var AAB = mix(a, b, 1/3);
-        var ABB = mix(b, a, 1/3);
-        var BCC = mix(c, b, 1/3);
-        var BBC = mix(b, c, 1/3);
-        var CCD = mix(c, d, 1/3);
-        var CDD = mix(d, c, 1/3);
-        var DDA = mix(d, a, 1/3);
-        var DAA = mix(a, d, 1/3);
-        var AABCDD = mix(AAB, CDD, 1/3);
-        var ABBCCD = mix(ABB, CCD, 1/3);
-        var AABCDD2 = mix(CDD, AAB, 1/3);
-        var ABBCCD2 = mix(CCD, ABB, 1/3);
+        var AAB = mix(a, b, 1/3); //ab
+        var ABB = mix(b, a, 1/3); //ba
+        var BCC = mix(c, b, 1/3); //cb
+        var BBC = mix(b, c, 1/3); //bc
+        var CCD = mix(c, d, 1/3); //cd
+        var CDD = mix(d, c, 1/3); //dc
+        var DDA = mix(d, a, 1/3); //da
+        var DAA = mix(a, d, 1/3); //ad
+        var AABCDD = mix(AAB, CDD, 1/3); //abd
+        var ABBCCD = mix(ABB, CCD, 1/3); //abc
+        var AABCDD2 = mix(CDD, AAB, 1/3); //acd
+        var ABBCCD2 = mix(CCD, ABB, 1/3); //bcd
 
 
         --count;
 
         // átta nýjir kassar
 
-        divideSquare(a, AAB, AABCDD, DAA, count);
+        divideSquare(a, AAB, AABCDD, DAA, count);  
         divideSquare(AAB, ABB, ABBCCD, AABCDD, count);
         divideSquare(b, BBC, ABBCCD, ABB, count);
         divideSquare(BBC, BCC, ABBCCD2, ABBCCD, count);

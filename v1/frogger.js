@@ -56,13 +56,15 @@ window.onload = function init()
                 vertices[1][1] -= 0.1;
                 vertices[2][1] -= 0.1;
             }
-            else if(direction == 3){ //hægri->upp
-                vertices[2][0] = vertices[1][0]+0.2
-                vertices[2][1] = vertices[1][1]
+            else if(direction == 3){ //hægri->upp (Snýr niður)
+                vertices[0][1] += 0.1;
+                vertices[1][1] -= 0.1;
+                vertices[2][1] -= 0.1;
             }
-            else if(direction == 4){ //vinstri->upp
-                vertices[1][0] = vertices[2][0]-0.2
-                vertices[1][1] = vertices[2][1]
+            else if(direction == 4){ //vinstri->upp (Snýr niður)
+                vertices[0][1] += 0.1;
+                vertices[1][1] -= 0.1;
+                vertices[2][1] -= 0.1;
             }
             for(let i = 0; i<3; i++) {
                 vertices[i][1] += step
@@ -75,13 +77,15 @@ window.onload = function init()
                 vertices[1][1] += 0.1;
                 vertices[2][1] += 0.1;
             }
-            else if(direction == 3){ //hægri->niður
-                vertices[1][0] = vertices[2][0]+0.2
-                vertices[1][1] = vertices[2][1]
+            else if(direction == 3){ //hægri->niður (Snýr upp)
+                vertices[0][1] -= 0.1;
+                vertices[1][1] += 0.1;
+                vertices[2][1] += 0.1;
             }
-            else if(direction == 4){ //vinstri->niður
-                vertices[2][0] = vertices[1][0]-0.2
-                vertices[2][1] = vertices[1][1]
+            else if(direction == 4){ //vinstri->niður (Snýr upp)
+                vertices[0][1] -= 0.1;
+                vertices[1][1] += 0.1;
+                vertices[2][1] += 0.1;
             }
             for(let i = 0; i<3; i++) {
                 vertices[i][1] -= step
@@ -90,38 +94,38 @@ window.onload = function init()
 
         }
         else if(event.code == "ArrowRight"){
-            if(direction == 1){ //upp->hægri
-                vertices[2][0] = vertices[1][0]
-                vertices[2][1] = vertices[1][1]+0.2
-            }
-            else if(direction == 2){ //niður->hægri
-                vertices[2][0] = vertices[1][0]
-                vertices[2][1] = vertices[1][1]-0.2
-            }
-            else if(direction == 4){ //vinstri->hægri
-                vertices[0][0] += 0.1;
-                vertices[1][0] -= 0.1;
-                vertices[2][0] -= 0.1;
-            }
+            //if(direction == 1){ //upp->hægri
+            //    vertices[2][0] = vertices[1][0]
+            //    vertices[2][1] = vertices[1][1]+0.2
+            //}
+            //else if(direction == 2){ //niður->hægri
+            //    vertices[2][0] = vertices[1][0]
+            //    vertices[2][1] = vertices[1][1]-0.2
+            //}
+            //else if(direction == 4){ //vinstri->hægri
+            //    vertices[0][0] += 0.1;
+            //    vertices[1][0] -= 0.1;
+            //    vertices[2][0] -= 0.1;
+            //}
             for(let i = 0; i<3; i++) {
                 vertices[i][0] += step
             }
             direction = 3
         }
         else if(event.code == "ArrowLeft"){
-            if(direction == 1){ //upp->vinstri
-                vertices[1][0] = vertices[2][0]
-                vertices[1][1] = vertices[2][1]+0.2
-            }
-            else if(direction == 2){ //niður->vinstri
-                vertices[1][0] = vertices[2][0]
-                vertices[1][1] = vertices[2][1]-0.2
-            }
-            else if(direction == 3){ //hægri->vinstri
-                vertices[0][0] -= 0.1;
-                vertices[1][0] += 0.1;
-                vertices[2][0] += 0.1;
-            }
+            //if(direction == 1){ //upp->vinstri
+            //    vertices[1][0] = vertices[2][0]
+            //    vertices[1][1] = vertices[2][1]+0.2
+            //}
+            //else if(direction == 2){ //niður->vinstri
+            //    vertices[1][0] = vertices[2][0]
+            //    vertices[1][1] = vertices[2][1]-0.2
+            //}
+            //else if(direction == 3){ //hægri->vinstri
+            //    vertices[0][0] -= 0.1;
+            //    vertices[1][0] += 0.1;
+            //    vertices[2][0] += 0.1;
+            //}
             for(let i = 0; i<3; i++) {
                 vertices[i][0] -= step;
             }
@@ -142,7 +146,7 @@ window.onload = function init()
 
 function render() {
     gl.clear( gl.COLOR_BUFFER_BIT );
-    gl.uniform4fv( colorFrog, vec4(0,0.68,0, 1) );
+    gl.uniform4fv( colorFrog, vec4(0,0.5,0, 1) );
     gl.drawArrays( gl.TRIANGLES, 0, 3 );
 
     window.requestAnimationFrame(render);

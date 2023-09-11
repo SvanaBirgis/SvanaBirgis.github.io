@@ -7,6 +7,8 @@
 var canvas;
 var gl;
 
+var xmove;
+var ymove;
 
 window.onload = function init() {
 
@@ -25,10 +27,9 @@ window.onload = function init() {
     gl.useProgram( program );
     
     var vertices = [
+        vec2( 0,    -0.7 ),
         vec2( -0.1, -0.9 ),
-        vec2( -0.1, -0.86 ),
-        vec2(  0.1, -0.86 ),
-        vec2(  0.1, -0.9 ) 
+        vec2( 0.1,  -0.9 )
     ];
     
     // Load the data into the GPU
@@ -44,17 +45,25 @@ window.onload = function init() {
     // Event listener for keyboard
     window.addEventListener("keydown", function(e){
         switch( e.code ) {
+            //case "ArrowUp":
+            //    ymove = 0.04;
+            //    break;
             case "ArrowLeft":	// vinstri ör
                 xmove = -0.04;
                 break;
             case "ArrowRight":	// hægri ör
                 xmove = 0.04;
                 break;
+            //case "ArrowDown":
+            //    ymove = -0.04;
+            //    break;
             default:
                 xmove = 0.0;
+                //ymove = 0.0;
         }
-        for(i=0; i<4; i++) {
+        for(i=0; i<3; i++) {
             vertices[i][0] += xmove;
+            //vertices[0][i] += ymove;
         }
 
         gl.bufferSubData(gl.ARRAY_BUFFER, 0, flatten(vertices));
@@ -67,7 +76,7 @@ window.onload = function init() {
 function render() {
     
     gl.clear( gl.COLOR_BUFFER_BIT );
-    gl.drawArrays( gl.TRIANGLE_FAN, 0, 4 );
+    gl.drawArrays( gl.TRIANGLES, 0, 3 );
 
     window.requestAnimationFrame(render);
 }

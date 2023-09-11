@@ -1,44 +1,15 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
-        <title> Dæmi 5 </title>
-        <script id="vertex-shader" type="x-shader/x-vertex">
-            uniform float time;
-            attribute vec4 vPosition;
-            
-            void main()
-            {
-                vec4 t = vPosition;
-                
-                t.y = 0.5*sin(0.0015*time + t.x) + 0.5*sin(0.0015*time + t.y);
-                t.x = 0.5*sin(0.0015*time + t.x) + 0.5*sin(0.0015*time + t.y);
-
-                
-                gl_Position = t;
-            }
-        </script>
-
-        <script id="fragment-shader" type="x-shader/x-fragment">
-            precision mediump float;
-            
-            void
-            main()
-            {
-                gl_FragColor = vec4( 1.0, 0.0, 0.0, 1.0 );
-            }
-        </script>
-
-        <script type="text/javascript" src="/Common/webgl-utils.js"></script>
-        <script type="text/javascript" src="/Common/initshaders.js"></script>
-        <script type="text/javascript" src="/Common/MV.js"></script>
-        <script type="text/javascript" src="wavetriangle.js"></script>
-    </head>
-
     <body>
-        
-        <canvas id="gl-canvas" width="512" height="512">
-            Oops ... your browser doesn't support the HTML5 canvas element
-        </canvas>
+        <h1>Tölvugrafík - TÖL105M</h1>
+        <ul>
+            <li>
+                <a href="wavetriangle/">Wave Triangle</a>
+            </li>
+            <li>
+                <a href="rotation/">Snúningar tester</a>
+            </li>
+           
+        </ul>
     </body>
 </html>

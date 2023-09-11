@@ -44,28 +44,37 @@ window.onload = function init() {
 
     // Event listener for keyboard
     window.addEventListener("keydown", function(e){
+        console.log(vertices)
+        xmove = 0
+        ymove = 0
         switch( e.code ) {
-            //case "ArrowUp":
-            //    ymove = 0.04;
-            //    break;
+            case "ArrowUp":
+                ymove = 0.04;
+
+                break;
             case "ArrowLeft":	// vinstri ör
                 xmove = -0.04;
                 break;
             case "ArrowRight":	// hægri ör
                 xmove = 0.04;
+                
                 break;
-            //case "ArrowDown":
-            //    ymove = -0.04;
-            //    break;
+            case "ArrowDown":
+                ymove = -0.04;
+                break;
             default:
                 xmove = 0.0;
-                //ymove = 0.0;
+                ymove = 0.0;
         }
         for(i=0; i<3; i++) {
             vertices[i][0] += xmove;
-            //vertices[0][i] += ymove;
+            console.log(ymove)
+            vertices[i][1] += ymove;
+            console.log(ymove)
+
         }
 
+        console.log(vertices)
         gl.bufferSubData(gl.ARRAY_BUFFER, 0, flatten(vertices));
     } );
 

@@ -5,7 +5,8 @@
         <title> Dæmi 1 </title>
         <script id="vertex-shader" type="x-shader/x-vertex">
             attribute vec4 vPosition;
-            uniform vec2 frog;
+            uniform vec2 pos;
+            
 
             void 
             main()
@@ -16,12 +17,12 @@
 
         <script id="fragment-shader" type="x-shader/x-fragment">
             precision mediump float;
-            uniform vec4 color;
+            uniform vec4 vColor;
             
             void
             main()
             {
-                gl_FragColor = color;
+                gl_FragColor = vColor;
             }
         </script>
 

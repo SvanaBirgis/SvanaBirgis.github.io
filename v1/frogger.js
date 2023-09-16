@@ -4,10 +4,8 @@ var gl;
 var colorFrog;
 var vPosition;
 
-// Spacing er off
-// Collision 
+// Rotation
 // stig
-
 
 // Svæðið er frá -maxX til maxX og -maxY til maxY
 var maxX = 1.0;
@@ -19,9 +17,9 @@ var frog = [
     vec2( 0.1,  -0.95 )
 ];
 
-var totalHeight = maxY * 2; // maxY represents the maximum y-coordinate value
-var totalLanes = 7; // Total number of lanes (including sidewalks)
-var laneHeight = totalHeight / totalLanes;
+var totalHeight = maxY * 2;
+var totalLanes = 7; // Total fjöldi akreina með gangstétt
+var laneHeight = totalHeight / totalLanes; //Hæð akreinar
 
 var currentLane = 0;
 
@@ -40,9 +38,6 @@ var sidewalk = [
     vec2(-1, -1), //bottom
 ];
 
-
-//var LANES = 7; // Fjöldi akgreina (með gangstétt).
-//var laneSize;       // Stærð einnar akgreinar.
 var cars = [];
 var carWidth = 0.3;
 var carHeight = 0.15;
@@ -52,10 +47,10 @@ var carSpacing = 0.8;
 
 
 function generateCars() {
-    for (var lane = 1; lane < totalLanes; lane++) { // Start from lane 1
+    for (var lane = 1; lane < totalLanes; lane++) {
         var laneY = maxY - lane * laneHeight - laneHeight / 2;
         var totalWidth = numCarsInLane * carWidth + (numCarsInLane - 1) * carSpacing;
-        var initialCarX = maxX + (maxX - totalWidth) / 2; // Center the cars initially on the screen
+        var initialCarX = maxX + (maxX - totalWidth) / 2; // Byrja með bílana í miðju skjásins
 
         for (var i = 0; i < numCarsInLane; i++) {
             var carX = initialCarX + i * (carWidth + carSpacing);
@@ -63,7 +58,7 @@ function generateCars() {
                 position: vec2(carX, laneY),
                 width: carWidth,
                 height: carHeight,
-                speed: carSpeeds[lane - 1] // Adjust the speed based on lane
+                speed: carSpeeds[lane - 1] // Mismunandi hraði per akrein
             });
         }
     }
@@ -71,11 +66,11 @@ function generateCars() {
 
 function moveCars() {
     for (var i = 0; i < cars.length; i++) {
-        cars[i].position[0] -= cars[i].speed; // Corrected typo
+        cars[i].position[0] -= cars[i].speed; 
 
-        // Check if a car moves off the screen to the left
+        // Tékkar ef bíll er farin af skjá vinstra megin
         if (cars[i].position[0] < -maxX - carWidth) {
-            // Reposition the car to the right edge of the screen
+            // Setja bíl rétt fyrir utan skjá hægra megin
             cars[i].position[0] = maxX + carSpacing;
         }
     }
@@ -86,7 +81,7 @@ function collision(){
     for (var i = 0; i < cars.length; i++) {
         var car = cars[i];
         
-        // Calculate the boundaries of the frog and the car
+        // Kantarnir á froski og bíl
         var frogLeft = Math.min(frog[0][0], frog[1][0], frog[2][0]);
         var frogRight = Math.max(frog[0][0], frog[1][0], frog[2][0]);
         var frogTop = Math.max(frog[0][1], frog[1][1], frog[2][1]);
@@ -97,22 +92,20 @@ function collision(){
         var carTop = car.position[1] + car.height / 2;
         var carBottom = car.position[1] - car.height / 2;
 
-        // Check for collision between frog and car
+        // Klessa þeir saman?
         if (
             frogLeft < carRight &&
             frogRight > carLeft &&
             frogTop > carBottom &&
             frogBottom < carTop
         ) {
-            // Frog collided with a car
-            // Reset the frog to the last sidewalk
+            // Þeir klesstust (resettar bara niðri :( )
             frog = [
                 vec2(0, -0.85),
                 vec2(-0.1, -0.95),
                 vec2(0.1, -0.95)
             ];
             
-            // Update the WebGL buffer data
             gl.bufferSubData(gl.ARRAY_BUFFER, 0, flatten(frog));
         }
     }
@@ -127,8 +120,8 @@ function movement(){
         ymove = 0;
         switch (e.code) {
             case "ArrowUp":
-                if (currentLane < totalLanes - 1) { // Check if not already in the top lane
-                    ymove += laneHeight; // Move one lane up
+                if (currentLane < totalLanes - 1) {
+                    ymove += laneHeight; 
                     currentLane++;
                 }
                 break;
@@ -139,8 +132,8 @@ function movement(){
                 xmove += 0.1;
                 break;
             case "ArrowDown":
-                if (currentLane > 0) { // Check if not already in the bottom lane
-                    ymove -= laneHeight; // Move one lane down
+                if (currentLane > 0) { 
+                    ymove -= laneHeight; 
                     currentLane--;
                 }
                 break;
@@ -156,7 +149,7 @@ function movement(){
             return [newX, newY];
         });
 
-        // Check if any part of the frog is outside the boundaries
+        // Tékka ef froskur er útfyrir rammann
         var isOutsideBoundaries = newVertices.some(function (vertex) {
             return (
                 vertex[0] < -maxX ||
@@ -166,7 +159,7 @@ function movement(){
             );
         });
 
-        // Only update the frog's position if it's not outside the boundaries
+        // Updadeum stapsetningu ef froskur er innan rammans
         if (!isOutsideBoundaries) {
             frog = newVertices;
             gl.bufferSubData(gl.ARRAY_BUFFER, 0, flatten(frog));

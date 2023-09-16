@@ -15,23 +15,8 @@ var maxY = 1.0;
 
 var frog = [
     vec2( 0,    -0.85 ),
-    vec2( -0.05, -0.95 ),
-    vec2( 0.05,  -0.95 )
-];
-
-var sidewalk = [
-    vec2(-1, 1),
-    vec2(-1, 0.8),
-    vec2(1, 1),
-    vec2(-1, 0.8),
-    vec2(1, 0.8),
-    vec2(1, 1), //top
-    vec2(-1, -0.8),
-    vec2(-1, -1),
-    vec2(1, -0.8),
-    vec2(1, -0.8),
-    vec2(1, -1),
-    vec2(-1, -1), //bottom
+    vec2( -0.1, -0.95 ),
+    vec2( 0.1,  -0.95 )
 ];
 
 var totalHeight = maxY * 2; // maxY represents the maximum y-coordinate value
@@ -40,6 +25,20 @@ var laneHeight = totalHeight / totalLanes;
 
 var currentLane = 0;
 
+var sidewalk = [
+    vec2(-1, 1),
+    vec2(-1, 0.7),
+    vec2(1, 1),
+    vec2(-1, 0.7),
+    vec2(1, 0.7),
+    vec2(1, 1), //top
+    vec2(-1, -0.7),
+    vec2(-1, -1),
+    vec2(1, -0.7),
+    vec2(1, -0.7),
+    vec2(1, -1),
+    vec2(-1, -1), //bottom
+];
 
 
 //var LANES = 7; // Fjöldi akgreina (með gangstétt).
@@ -47,9 +46,9 @@ var currentLane = 0;
 var cars = [];
 var carWidth = 0.3;
 var carHeight = 0.15;
-var numCarsInLane = 5;
+var numCarsInLane = 3;
 var carSpeeds = [0.017, 0.014, 0.011, 0.008, 0.005];
-var carSpacing = 0.5;
+var carSpacing = 0.8;
 
 
 function generateCars() {
@@ -84,13 +83,40 @@ function moveCars() {
 
 
 function collision(){
+    for (var i = 0; i < cars.length; i++) {
+        var car = cars[i];
+        
+        // Calculate the boundaries of the frog and the car
+        var frogLeft = Math.min(frog[0][0], frog[1][0], frog[2][0]);
+        var frogRight = Math.max(frog[0][0], frog[1][0], frog[2][0]);
+        var frogTop = Math.max(frog[0][1], frog[1][1], frog[2][1]);
+        var frogBottom = Math.min(frog[0][1], frog[1][1], frog[2][1]);
 
+        var carLeft = car.position[0] - car.width / 2;
+        var carRight = car.position[0] + car.width / 2;
+        var carTop = car.position[1] + car.height / 2;
+        var carBottom = car.position[1] - car.height / 2;
+
+        // Check for collision between frog and car
+        if (
+            frogLeft < carRight &&
+            frogRight > carLeft &&
+            frogTop > carBottom &&
+            frogBottom < carTop
+        ) {
+            // Frog collided with a car
+            // Reset the frog to the last sidewalk
+            frog = [
+                vec2(0, -0.85),
+                vec2(-0.1, -0.95),
+                vec2(0.1, -0.95)
+            ];
+            
+            // Update the WebGL buffer data
+            gl.bufferSubData(gl.ARRAY_BUFFER, 0, flatten(frog));
+        }
+    }
 }
-
-function points(){
-
-}
-
 
 
 
@@ -145,7 +171,7 @@ function movement(){
             frog = newVertices;
             gl.bufferSubData(gl.ARRAY_BUFFER, 0, flatten(frog));
         }
-    });
+    });    
 }
 
 window.onload = function init()
@@ -220,13 +246,17 @@ function renderFrog(){
 function render() {
     gl.clear(gl.COLOR_BUFFER_BIT);
 
+
     renderSidewalk();
 
     moveCars(); 
 
+    collision();
+
     renderCars();
 
     renderFrog();
+
 
     window.requestAnimationFrame(render);
 }

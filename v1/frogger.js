@@ -56,13 +56,12 @@ var cars = [];
 var carWidth = 0.3;
 var carHeight = 0.15;
 var numCarsInLane = 3;
-var carSpeeds = [0.007, -0.003, 0.002, -0.004, 0.005];
+var carSpeeds = [0.009, -0.003, 0.002, -0.004, 0.005];
 var carSpacing = 0.8;
 
 var score = 0;
 var scoreToWin = 10;
 var gameOver = false;
-
 
 function generateCars() {
     for (var lane = 1; lane < totalLanes; lane++) {
@@ -103,15 +102,17 @@ function moveCars() {
 }
 
 
-function collision(){
+function collision() {
+    var frogMoved = getFrogMovedArr();
+
     for (var i = 0; i < cars.length; i++) {
         var car = cars[i];
-        
+
         // Kantarnir á froski og bíl
-        var frogLeft = Math.min(frog[0][0], frog[1][0], frog[2][0]);
-        var frogRight = Math.max(frog[0][0], frog[1][0], frog[2][0]);
-        var frogTop = Math.max(frog[0][1], frog[1][1], frog[2][1]);
-        var frogBottom = Math.min(frog[0][1], frog[1][1], frog[2][1]);
+        var frogLeft = Math.min(frogMoved[0][0], frogMoved[1][0], frogMoved[2][0]);
+        var frogRight = Math.max(frogMoved[0][0], frogMoved[1][0], frogMoved[2][0]);
+        var frogTop = Math.max(frogMoved[0][1], frogMoved[1][1], frogMoved[2][1]);
+        var frogBottom = Math.min(frogMoved[0][1], frogMoved[1][1], frogMoved[2][1]);
 
         var carLeft = car.position[0] - car.width / 2;
         var carRight = car.position[0] + car.width / 2;
@@ -125,14 +126,8 @@ function collision(){
             frogTop > carBottom &&
             frogBottom < carTop
         ) {
-            // Þeir klesstust (resettar bara niðri :( )
-            frog = [
-                vec2(0, -0.85),
-                vec2(-0.1, -0.95),
-                vec2(0.1, -0.95)
-            ];
-            
-            gl.bufferSubData(gl.ARRAY_BUFFER, 0, flatten(frog));
+            // Froskur varð fyrir bíl
+            resetFrog();
         }
     }
 }
@@ -193,36 +188,34 @@ function movement() {
     });
 }
 
-
-window.onload = function init()
-{
+window.onload = function init() {
     var canvas = document.getElementById("gl-canvas");
-    
+
     gl = WebGLUtils.setupWebGL(canvas);
     if (!gl) { alert("WebGL isn't available"); }
 
 
     //  Configure WebGL
 
-    gl.viewport( 0, 0, canvas.width, canvas.height );
-    gl.clearColor( 0.2, 0.2, 0.2, 1.0 );
-    
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    gl.clearColor(0.2, 0.2, 0.2, 1.0);
+
     //  Load shaders and initialize attribute buffers
-    
-    var program = initShaders( gl, "vertex-shader", "fragment-shader" );
-    gl.useProgram( program );
+
+    var program = initShaders(gl, "vertex-shader", "fragment-shader");
+    gl.useProgram(program);
 
     // Load the data into the GPU
     var bufferId = gl.createBuffer();
-    gl.bindBuffer( gl.ARRAY_BUFFER, bufferId );
-    
+    gl.bindBuffer(gl.ARRAY_BUFFER, bufferId);
+
 
     // Associate out shader variables with our data buffer
-    var vPosition = gl.getAttribLocation( program, "vPosition" );
-    gl.vertexAttribPointer( vPosition, 2, gl.FLOAT, false, 0, 0 );
-    gl.enableVertexAttribArray( vPosition );
+    var vPosition = gl.getAttribLocation(program, "vPosition");
+    gl.vertexAttribPointer(vPosition, 2, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(vPosition);
 
-    colorFrog = gl.getUniformLocation( program, "vColor" );
+    colorFrog = gl.getUniformLocation(program, "vColor");
 
     movement();
 
@@ -232,14 +225,14 @@ window.onload = function init()
 
 }
 
-function renderSidewalk(){
-    gl.bufferData( gl.ARRAY_BUFFER, flatten(sidewalk), gl.STATIC_DRAW );
-    gl.vertexAttribPointer(vPosition, 2, gl.FLOAT, false, 0,0);
-    gl.uniform4fv( colorFrog, vec4(0.8,0.8,0.8, 1));
-    gl.drawArrays( gl.TRIANGLES, 0, sidewalk.length);
+function renderSidewalk() {
+    gl.bufferData(gl.ARRAY_BUFFER, flatten(sidewalk), gl.STATIC_DRAW);
+    gl.vertexAttribPointer(vPosition, 2, gl.FLOAT, false, 0, 0);
+    gl.uniform4fv(colorFrog, vec4(0.8, 0.8, 0.8, 1));
+    gl.drawArrays(gl.TRIANGLES, 0, sidewalk.length);
 }
 
-function renderCars(){
+function renderCars() {
     for (var i = 0; i < cars.length; i++) {
         var car = cars[i];
         gl.bufferData(gl.ARRAY_BUFFER, flatten([
@@ -256,20 +249,49 @@ function renderCars(){
     }
 }
 
-function renderFrog(){
-    gl.bufferData(gl.ARRAY_BUFFER, flatten(frog), gl.DYNAMIC_DRAW);
-    gl.uniform4fv(colorFrog, vec4(0,0.5,0, 1));
+function renderFrog() {
+    var frogMoved = getFrogMovedArr();
+
+    gl.bufferData(gl.ARRAY_BUFFER, flatten(frogMoved), gl.DYNAMIC_DRAW);
+    gl.uniform4fv(colorFrog, vec4(0, 0.5, 0, 1));
     gl.drawArrays(gl.TRIANGLES, 0, 3);
+}
+
+function checkScore() {
+    if (frogStartedDown && currentLane == totalLanes - 1) {
+        frogStartedDown = false;
+        frog = frogDown;
+        increaseScore();
+    }
+
+    if (!frogStartedDown && currentLane == 0) {
+        frogStartedDown = true;
+        frog = frogUp;
+        increaseScore()
+    }
+
+    if (score >= scoreToWin) {
+        gameOver = true;
+        document.getElementById("winner").innerHTML = `<div id="bigger">You won!</div> <br/><br/> <button id="playagain" onclick="playAgain()">Click here</button> to play again.`
+    }
+}
+
+function increaseScore() {
+    score += 1;
+    updateScoreText();
+}
+
+function updateScoreText() {
+    document.getElementById("score").innerHTML = 'Score: ' + score + ' / 10'; 
 }
 
 
 function render() {
     gl.clear(gl.COLOR_BUFFER_BIT);
 
-
     renderSidewalk();
 
-    moveCars(); 
+    moveCars();
 
     collision();
 
@@ -277,6 +299,49 @@ function render() {
 
     renderFrog();
 
+    checkScore();
 
-    window.requestAnimationFrame(render);
+    if (!gameOver) {
+        window.requestAnimationFrame(render);
+    }
+}
+
+function getFrogMovedArr() {
+    return frog.map(function (vertex) {
+        var newX = vertex[0] + xPos;
+        var newY = vertex[1] + yPos;
+
+        return [newX, newY];
+    });
+}
+
+function resetFrog() {
+    if (frogStartedDown) {
+        frog = frogUp;
+        currentLane = 0
+        xPos = 0;
+        yPos = -0.95;
+    } else {
+        frog = frogDown;
+        currentLane = totalLanes - 1;
+        xPos = 0;
+        yPos = 0.85;
+    }
+}
+
+function playAgain() {
+    resetSimulation();
+    render();
+}
+
+function resetSimulation() {
+    score = 0;
+    updateScoreText();
+
+    document.getElementById("winner").innerHTML = '';
+
+    frogStartedDown = true;
+    resetFrog();
+
+    gameOver = false;
 }

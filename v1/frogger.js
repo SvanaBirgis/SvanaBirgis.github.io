@@ -56,7 +56,7 @@ var cars = [];
 var carWidth = 0.3;
 var carHeight = 0.15;
 var numCarsInLane = 3;
-var carSpeeds = [0.009, -0.003, 0.002, -0.004, 0.005];
+var carSpeeds = [0.01, -0.005, 0.003, -0.006, 0.007];
 var carSpacing = 0.8;
 
 var score = 0;

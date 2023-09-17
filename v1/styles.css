@@ -1,8 +1,41 @@
 body {
-    margin: 1em auto;
-    /*display: flex;
-    justify-content: center;*/
-    display: flex;
-    max-width: 512px;
-    flex-direction: column;
-  }
+  margin: 1em auto;
+  /*display: flex;
+  justify-content: center;*/
+  display: flex;
+  max-width: 600px;
+  flex-direction: column;
+  background-color: rgb(59, 59, 59);
+}
+
+#score {
+font-size: 2em;
+color: rgb(186, 255, 240);
+font-family: 'Courier New', Courier, monospace;
+
+}
+
+#winner {
+  font-size: 2em;
+  max-width: 512px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  color: rgb(186, 255, 240);
+}
+
+#bigger {
+font-size: 3rem;
+}
+
+#playagain {
+background: none;
+color: inherit;
+border: none;
+padding: 0;
+font: inherit;
+cursor: pointer;
+outline: inherit;
+}

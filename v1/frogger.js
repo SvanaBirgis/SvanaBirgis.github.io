@@ -4,18 +4,32 @@ var gl;
 var colorFrog;
 var vPosition;
 
-// Rotation
-// stig
-
 // Svæðið er frá -maxX til maxX og -maxY til maxY
 var maxX = 1.0;
 var maxY = 1.0;
 
-var frog = [
-    vec2( 0,    -0.85 ),
-    vec2( -0.1, -0.95 ),
-    vec2( 0.1,  -0.95 )
+// Staða frosks
+var xPos = 0;
+var yPos = -0.95;
+
+// Uppbygging frosks út frá 0 punkti (snýr upp eða niður)
+var frogUp = [
+    vec2(0, 0.1),
+    vec2(-0.1, 0),
+    vec2(0.1, 0)
 ];
+
+var frogDown = [
+    vec2(-0.1, 0.1),
+    vec2(0.1, 0.1),
+    vec2(0, 0)
+];
+
+// Froskur snýr upp upphaflega
+var frog = frogUp;
+
+// Geymum hvar froskur byrjaði ferð sína til að vita hvert á að skila honum ef hann deyr
+var frogStartedDown = true;
 
 var totalHeight = maxY * 2;
 var totalLanes = 7; // Total fjöldi akreina með gangstétt
@@ -42,8 +56,12 @@ var cars = [];
 var carWidth = 0.3;
 var carHeight = 0.15;
 var numCarsInLane = 3;
-var carSpeeds = [0.017, 0.014, 0.011, 0.008, 0.005];
+var carSpeeds = [0.007, -0.003, 0.002, -0.004, 0.005];
 var carSpacing = 0.8;
+
+var score = 0;
+var scoreToWin = 10;
+var gameOver = false;
 
 
 function generateCars() {
@@ -66,12 +84,20 @@ function generateCars() {
 
 function moveCars() {
     for (var i = 0; i < cars.length; i++) {
-        cars[i].position[0] -= cars[i].speed; 
+        cars[i].position[0] += cars[i].speed;
 
-        // Tékkar ef bíll er farin af skjá vinstra megin
-        if (cars[i].position[0] < -maxX - carWidth) {
-            // Setja bíl rétt fyrir utan skjá hægra megin
-            cars[i].position[0] = maxX + carSpacing;
+        if (cars[i].speed < 0) {
+            // Tékkar ef bíll er farin af skjá vinstra megin
+            if (cars[i].position[0] < -maxX - carWidth) {
+                // Setja bíl rétt fyrir utan skjá hægra megin
+                cars[i].position[0] = maxX + carSpacing;
+            }
+        } else {
+            // Tékkar ef bíll er farin af skjá hægra megin
+            if (cars[i].position[0] > maxX + carWidth) {
+                // Setja bíl rétt fyrir utan skjá vinstra megin
+                cars[i].position[0] = -maxX - carWidth;
+            }
         }
     }
 }
@@ -113,15 +139,16 @@ function collision(){
 
 
 
-function movement(){
+function movement() {
     // Event listener for keyboard
     window.addEventListener("keydown", function (e) {
         xmove = 0;
         ymove = 0;
         switch (e.code) {
             case "ArrowUp":
+                frog = frogUp;
                 if (currentLane < totalLanes - 1) {
-                    ymove += laneHeight; 
+                    ymove += laneHeight;
                     currentLane++;
                 }
                 break;
@@ -132,8 +159,9 @@ function movement(){
                 xmove += 0.1;
                 break;
             case "ArrowDown":
-                if (currentLane > 0) { 
-                    ymove -= laneHeight; 
+                frog = frogDown;
+                if (currentLane > 0) {
+                    ymove -= laneHeight;
                     currentLane--;
                 }
                 break;
@@ -142,15 +170,13 @@ function movement(){
                 ymove = 0.0;
         }
 
-        var newVertices = frog.map(function (vertex) {
-            var newX = vertex[0] + xmove;
-            var newY = vertex[1] + ymove;
+        xPos += xmove;
+        yPos += ymove;
 
-            return [newX, newY];
-        });
+        var frogMoved = getFrogMovedArr();
 
         // Tékka ef froskur er útfyrir rammann
-        var isOutsideBoundaries = newVertices.some(function (vertex) {
+        var isOutsideBoundaries = frogMoved.some(function (vertex) {
             return (
                 vertex[0] < -maxX ||
                 vertex[0] > maxX ||
@@ -159,13 +185,14 @@ function movement(){
             );
         });
 
-        // Updadeum stapsetningu ef froskur er innan rammans
-        if (!isOutsideBoundaries) {
-            frog = newVertices;
-            gl.bufferSubData(gl.ARRAY_BUFFER, 0, flatten(frog));
+        // Sleppum því að uppfæra staðsetningu ef froskur er utan rammans
+        if (isOutsideBoundaries) {
+            xPos -= xmove;
+            yPos -= ymove;
         }
-    });    
+    });
 }
+
 
 window.onload = function init()
 {

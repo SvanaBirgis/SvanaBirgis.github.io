@@ -2,13 +2,12 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
-<title>Grænlenksi fáninn</title>
+<title>Íslenski fáninn</title>
 
 <script id="vertex-shader" type="x-shader/x-vertex">
 uniform float time;
 attribute vec4 vPosition;
 varying vec3 color;
-
 
 void main()
 {
@@ -16,24 +15,13 @@ void main()
     vec4 tpos = vPosition;
 
     tpos.y = 1.0 - mod(0.0015*time + tpos.y+1.0, 2.0);
-    if(tpos.x*tpos.x + tpos.y*tpos.y < 0.3){
-        if(tpos.y < 0.0){
-            color = vec3(1,1,1);
-        }
-        else{
-            color = vec3(1,0,0);
-        
-        }
+    if(-0.1 < tpos.x && tpos.x < 0.1 || -0.1 < tpos.y && tpos.y < 0.1){
+        color = vec3(1,0,0);
+    }else if(-0.2 < tpos.x && tpos.x < 0.2 || -0.2 < tpos.y && tpos.y < 0.2){
+        color = vec3(1,1,1);
     }else{
-        if(tpos.y > 0.0){
-            color = vec3(1,1,1);
-        }else{
-            color = vec3(1,0,0);
-        }
+        color = vec3(0,0,1);
     }
-
-
-
 
     gl_Position = tpos;
     

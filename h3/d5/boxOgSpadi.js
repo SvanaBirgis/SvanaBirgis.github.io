@@ -20,7 +20,7 @@ var maxY = 1.0;
 var boxRad = 0.05;
 
 // Ferningurinn er upphaflega í miðjunni
-var vertices = new Float32Array([-0.05, -0.05, 0.05, -0.05, 0.05, 0.05, -0.05, 0.05]);
+var vertices = new Float32Array([-boxRad, -boxRad, boxRad, -boxRad, boxRad, boxRad, -boxRad, boxRad]);
 
 
 window.onload = function init() {
@@ -98,12 +98,14 @@ window.onload = function init() {
 
 function collision(){
 
-    if (box[0] + boxRad >= spadi[0][0] - 0.1 &&
-        box[1] - boxRad <= spadi[1][1] &&
-        box[0] - boxRad <= spadi[2][0] + 0.1 &&
-        box[1] - boxRad <= spadi[3][1]){
+    if (dY > 0) return;
 
-        dY = -dY; // Ef árekstur á sér stað, senda kassann aftur upp.
+    if (box[0] + boxRad >= spadi[0][0] &&
+        box[1] - boxRad <= spadi[1][1] &&
+        box[0] - boxRad <= spadi[2][0] &&
+        box[1] - boxRad <= spadi[3][1]) {
+
+        dY = -dY; 
     }
 }
 

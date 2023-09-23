@@ -73,8 +73,6 @@ function render() {
 
 	// Setjum litinn sem rauðann og teiknum helming punktanna
     for (let i = 0; i < 100; i++) {
-
-
         gl.uniform4fv( colorLoc, vec4(Math.random(), Math.random(), Math.random(), 1) );
         gl.uniform2fv( offsetLoc, points.slice(i, i+3));
         gl.drawArrays( gl.TRIANGLES, 3*i, 3 );

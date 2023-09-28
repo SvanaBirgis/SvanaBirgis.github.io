@@ -135,21 +135,45 @@ function render()
     mv = mult( mv, rotateX(spinX) );
     mv = mult( mv, rotateY(spinY) ) ;
 
-    // Build the letter H...
-    // First the right leg
-    mv1 = mult( mv, translate( -0.3, 0.0, 0.0 ) );
-    mv1 = mult( mv1, scalem( 0.1, 1.0, 0.1 ) );
+    
+    // First the front left leg
+    mv1 = mult( mv, translate( -0.7, 0.0, -0.3 ) );
+    //mv1 = mult( mv1, rotateX(3));
+    //mv1 = mult( mv1, rotateZ(-3));
+    mv1 = mult( mv1, scalem( 0.1, 0.5, 0.1 ) );
     gl.uniformMatrix4fv(matrixLoc, false, flatten(mv1));
     gl.drawArrays( gl.TRIANGLES, 0, numVertices );
 
-    // Then the left leg
-    mv1 = mult( mv, translate( 0.3, 0.0, 0.0 ) );
-    mv1 = mult( mv1, scalem( 0.1, 1.0, 0.1 ) );
+
+    // First the back left leg
+    mv1 = mult( mv, translate( -0.7, 0.0, 0.3 ) );
+    //mv1 = mult( mv1, rotateX(3));
+    //mv1 = mult( mv1, rotateZ(-3));
+    mv1 = mult( mv1, scalem( 0.1, 0.5, 0.1 ) );
+    gl.uniformMatrix4fv(matrixLoc, false, flatten(mv1));
+    gl.drawArrays( gl.TRIANGLES, 0, numVertices );
+
+
+    // First the front right leg
+    mv1 = mult( mv, translate( 0.7, 0.0, -0.3 ) );
+    //mv1 = mult( mv1, rotateX(3));
+    //mv1 = mult( mv1, rotateZ(-3));
+    mv1 = mult( mv1, scalem( 0.1, 0.5, 0.1 ) );
+    gl.uniformMatrix4fv(matrixLoc, false, flatten(mv1));
+    gl.drawArrays( gl.TRIANGLES, 0, numVertices );
+
+
+    // First the back right leg
+    mv1 = mult( mv, translate( 0.7, 0.0, 0.3 ) );
+    //mv1 = mult( mv1, rotateX(3));
+    //mv1 = mult( mv1, rotateZ(-3));
+    mv1 = mult( mv1, scalem( 0.1, 0.5, 0.1 ) );
     gl.uniformMatrix4fv(matrixLoc, false, flatten(mv1));
     gl.drawArrays( gl.TRIANGLES, 0, numVertices );
 
     // Finally the middle bar (no translation necessary)
-    mv1 = mult( mv, scalem( 0.5, 0.1, 0.1 ) );
+    mv1 = mult( mv, translate( 0.0, 0.5, 0.0 ) );
+    mv1 = mult( mv, scalem( 0.9, 0.1, 0.75 ) );
     gl.uniformMatrix4fv(matrixLoc, false, flatten(mv1));
     gl.drawArrays( gl.TRIANGLES, 0, numVertices );
 

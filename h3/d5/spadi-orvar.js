@@ -1,10 +1,3 @@
-/////////////////////////////////////////////////////////////////
-//    Sýnidæmi í Tölvugrafík
-//     Ferningur skoppar um gluggann.  Notandi getur breytt
-//     hraðanum með upp/niður örvum.
-//
-//    Hjálmtýr Hafsteinsson, september 2023
-/////////////////////////////////////////////////////////////////
 var canvas;
 var gl;
 

@@ -8,17 +8,17 @@ varying vec4 fColor;
 
 uniform mat4 rotation;
 
-void main()
+void main() 
 {
     fColor = vColor;
     gl_Position = rotation * vPosition;
-}
+} 
 </script>
 
 <script id="fragment-shader" type="x-shader/x-fragment">
 
 precision mediump float;
-
+   
 varying vec4 fColor;
 
 void main()
@@ -30,11 +30,11 @@ void main()
 <script type="text/javascript" src="/Common/webgl-utils.js"></script>
 <script type="text/javascript" src="/Common/initShaders.js"></script>
 <script type="text/javascript" src="/Common/MV.js"></script>
-<script type="text/javascript" src="solkerfi.js"></script>
+<script type="text/javascript" src="kollur.js"></script>
 
 <body>
-<canvas id="gl-canvas" width="700" height="700">
-
+<canvas id="gl-canvas" width="512" height="512">
+   
 <br/>
 
 </body>

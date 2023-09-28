@@ -127,7 +127,7 @@ function render() {
 
 
     // First the front left leg
-    mv1 = mult(mv, translate(-0.7, 0.0, -0.3));
+    mv1 = mult(mv, translate(-0.4, 0.0, -0.325));
     //mv1 = mult( mv1, rotateX(3));
     //mv1 = mult( mv1, rotateZ(-3));
     mv1 = mult(mv1, scalem(0.1, 0.5, 0.1));
@@ -136,28 +136,28 @@ function render() {
 
 
     // The back left leg
-    mv1 = mult(mv, translate(-0.7, 0.0, 0.3));
+    mv1 = mult(mv, translate(-0.4, 0.0, 0.325));
     mv1 = mult(mv1, scalem(0.1, 0.5, 0.1));
     gl.uniformMatrix4fv(matrixLoc, false, flatten(mv1));
     gl.drawArrays(gl.TRIANGLES, 0, numVertices);
 
 
     // The front right leg
-    mv1 = mult(mv, translate(0.7, 0.0, -0.3));
+    mv1 = mult(mv, translate(0.4, 0.0, -0.325));
     mv1 = mult(mv1, scalem(0.1, 0.5, 0.1));
     gl.uniformMatrix4fv(matrixLoc, false, flatten(mv1));
     gl.drawArrays(gl.TRIANGLES, 0, numVertices);
 
 
     // The back right leg
-    mv1 = mult(mv, translate(0.7, 0.0, 0.3));
+    mv1 = mult(mv, translate(0.4, 0.0, 0.325));
     mv1 = mult(mv1, scalem(0.1, 0.5, 0.1));
     gl.uniformMatrix4fv(matrixLoc, false, flatten(mv1));
     gl.drawArrays(gl.TRIANGLES, 0, numVertices);
 
-    // Finally the middle bar (no translation necessary)
-    mv1 = mult(mv, translate(0.0, 0.5, 0.0));
-    mv1 = mult(mv, scalem(0.9, 0.1, 0.75));
+    // Finally the seat
+    mv1 = mult(mv, translate(0.0, 0.22, 0.0));
+    mv1 = mult(mv1, scalem(0.9, 0.1, 0.75));
     gl.uniformMatrix4fv(matrixLoc, false, flatten(mv1));
     gl.drawArrays(gl.TRIANGLES, 0, numVertices);
 

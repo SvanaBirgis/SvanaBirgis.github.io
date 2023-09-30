@@ -1,6 +1,9 @@
 var canvas;
 var gl;
 
+// Laga hlutföll á fótum. Bil í milli hægri og vinstri = 51 cm 
+// og bil á milli fremri og aftari = 39 cm
+
 var numVertices = 36;
 
 var points = [];
@@ -125,15 +128,11 @@ function render() {
     mv = mult(mv, rotateX(spinX));
     mv = mult(mv, rotateY(spinY));
 
-
     // First the front left leg
     mv1 = mult(mv, translate(-0.4, 0.0, -0.325));
-    //mv1 = mult( mv1, rotateX(3));
-    //mv1 = mult( mv1, rotateZ(-3));
     mv1 = mult(mv1, scalem(0.1, 0.5, 0.1));
     gl.uniformMatrix4fv(matrixLoc, false, flatten(mv1));
     gl.drawArrays(gl.TRIANGLES, 0, numVertices);
-
 
     // The back left leg
     mv1 = mult(mv, translate(-0.4, 0.0, 0.325));
@@ -141,13 +140,11 @@ function render() {
     gl.uniformMatrix4fv(matrixLoc, false, flatten(mv1));
     gl.drawArrays(gl.TRIANGLES, 0, numVertices);
 
-
     // The front right leg
     mv1 = mult(mv, translate(0.4, 0.0, -0.325));
     mv1 = mult(mv1, scalem(0.1, 0.5, 0.1));
     gl.uniformMatrix4fv(matrixLoc, false, flatten(mv1));
     gl.drawArrays(gl.TRIANGLES, 0, numVertices);
-
 
     // The back right leg
     mv1 = mult(mv, translate(0.4, 0.0, 0.325));
@@ -159,8 +156,7 @@ function render() {
     mv1 = mult(mv, translate(0.0, 0.22, 0.0));
     mv1 = mult(mv1, scalem(0.9, 0.1, 0.75));
     gl.uniformMatrix4fv(matrixLoc, false, flatten(mv1));
-    gl.drawArrays(gl.TRIANGLES, 0, numVertices);
-
+    gl.drawArrays(gl.TRIANGLES, 0, numVertices);    
     
     requestAnimFrame(render);
 }

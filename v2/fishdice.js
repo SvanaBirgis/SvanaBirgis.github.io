@@ -175,9 +175,41 @@ function generateRandomFishData(numFish) {
 // Call the function to generate random fish positions and colors
 generateRandomFishData(100); // Generate 10 random fish positions and colors
 
+// Function to update fish positions
+function updateFishPositions() {
+    for (var i = 0; i < fishData.length; i++) {
+        var fish = fishData[i];
+
+        // Generate random direction vector
+        if (!fish.direction) {
+            fish.direction = vec3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5);
+        }
+
+        // Normalize the direction vector to control the speed
+        fish.direction = normalize(fish.direction);
+
+        // Update fish position based on the direction vector
+        var speed = 0.01; // Adjust the speed as needed
+        fish.x += speed * fish.direction[0];
+        fish.y += speed * fish.direction[1];
+        fish.z += speed * fish.direction[2];
+        
+        // Wrap the fish around the scene if it goes outside the cube
+        if (fish.x > 10 || fish.x < -10 || fish.y > 10 || fish.y < -10 || fish.z > 10 || fish.z < -10) {
+            // Reset the fish's position and generate a new random direction
+            fish.x = Math.random() * 20 - 10;
+            fish.y = Math.random() * 20 - 10;
+            fish.z = Math.random() * 20 - 10;
+            fish.direction = vec3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5);
+        }
+    }
+}
+
 function render()
 {
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    updateFishPositions();
 
     var mv = lookAt( vec3(0.0, 0.0, zView), vec3(0.0, 0.0, 0.0), vec3(0.0, 1.0, 0.0) );
     mv = mult( mv, rotateX(spinX) );

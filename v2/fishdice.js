@@ -25,6 +25,8 @@ var vertices = [
     vec4(-0.1, 0.15, 0.0, 1.0),
 ];
 
+
+
 var box = [
     vec4(-10, 10, -10, 1.0),
     vec4(-10, -10, -10, 1.0),
@@ -46,8 +48,6 @@ var box = [
 ];
 
 
-
-
 var movement = false;     // Er m�sarhnappur ni�ri?
 var spinX = 0;
 var spinY = 0;
@@ -65,6 +65,9 @@ var zView = 2.0;          // Sta�setning �horfanda � z-hniti
 var proLoc;
 var mvLoc;
 var colorLoc;
+
+
+
 
 // Litur á fisk
 let fishColor = [ Math.random(), Math.random(), Math.random(), 1.0];
@@ -151,6 +154,26 @@ window.onload = function init()
     render();
 }
 
+var fishData = []; // An array to store random fish positions and colors
+
+// Function to generate random fish positions and colors
+function generateRandomFishData(numFish) {
+    fishData = []; // Clear the previous data
+    for (var i = 0; i < numFish; i++) {
+        // Generate random x, y, and z positions within the cube
+        var x = Math.random() * 20 - 10; // Adjust as needed based on your cube size
+        var y = Math.random() * 20 - 10; // Adjust as needed based on your cube size
+        var z = Math.random() * 20 - 10; // Adjust as needed based on your cube size
+        
+        // Generate a random color for the fish
+        var color = [Math.random(), Math.random(), Math.random(), 1.0];
+        
+        fishData.push({ x, y, z, color });
+    }
+}
+
+// Call the function to generate random fish positions and colors
+generateRandomFishData(100); // Generate 10 random fish positions and colors
 
 function render()
 {
@@ -160,33 +183,50 @@ function render()
     mv = mult( mv, rotateX(spinX) );
     mv = mult( mv, rotateY(spinY) );
 
+    // Box
     gl.bufferData( gl.ARRAY_BUFFER, flatten(box), gl.STATIC_DRAW );
     gl.uniform4fv( colorLoc, vec4(0.0, 0.0, 0.0, 1.0) );
     gl.uniformMatrix4fv(mvLoc, false, flatten(mv));
     gl.drawArrays(gl.LINE_STRIP, 0, 16);  
 
+    
     // Fiskur
-    rotTail += incTail;
-    if( rotTail > 35.0  || rotTail < -35.0 )
-        incTail *= -1;
+    
       
+    rotTail += incTail;
+        if( rotTail > 35.0  || rotTail < -35.0 )
+            incTail *= -1;
 
-    gl.bufferData( gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW );
-	gl.uniform4fv(colorLoc, vec4(fishColor[0], fishColor[1], fishColor[2], 1.0));
+     for (var i = 0; i < fishData.length; i++) {
+        var fish = fishData[i];
+        var mvFish = mv;
+        mvFish = mult(mvFish, translate(fish.x, fish.y, fish.z));
+        
+        // Use the random color for the fish
+        gl.bufferData(gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW);
+        gl.uniform4fv(colorLoc, vec4(fish.color[0], fish.color[1], fish.color[2], fish.color[3]));
+        
+        // Rest of the fish drawing code here...
+        
+        // Modify the mv matrix with mvFish and draw the fish
+        gl.uniformMatrix4fv(mvLoc, false, flatten(mvFish));
+        gl.drawArrays(gl.TRIANGLES, 0, NumBody);
+    //gl.bufferData( gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW );
+	//gl.uniform4fv(colorLoc, vec4(fishColor[0], fishColor[1], fishColor[2], 1.0));
 
 	// Teikna l�kama fisks (�n sn�nings)
-    gl.uniformMatrix4fv(mvLoc, false, flatten(mv));
-    gl.drawArrays( gl.TRIANGLES, 0, NumBody );
+    //gl.uniformMatrix4fv(mvLoc, false, flatten(mv));
+    //gl.drawArrays( gl.TRIANGLES, 0, NumBody );
 
     // Teikna spor� og sn�a honum
-	var mv_tail = mv;
+	var mv_tail = mvFish;
     mv_tail = mult( mv_tail, translate ( -0.5, 0.0, 0.0 ) );
     mv_tail = mult( mv_tail, rotateY( rotTail ) );
 	mv_tail = mult( mv_tail, translate ( 0.5, 0.0, 0.0 ) );
     gl.uniformMatrix4fv(mvLoc, false, flatten(mv_tail));
     gl.drawArrays( gl.TRIANGLES, NumBody, NumTail );
 
-    var mv_l = mv;
+    var mv_l = mvFish;
     mv_l = mult( mv_l, translate ( -0.05, 0.0, 0 ) );
     mv_l = mult(mv_l, rotateZ(90));
     mv_l = mult(mv_l, rotateX(45 + 0.5 * rotTail));
@@ -195,7 +235,7 @@ function render()
     gl.uniformMatrix4fv(mvLoc, false, flatten(mv_l));
     gl.drawArrays( gl.TRIANGLES, NumBody+NumTail, NumFins );
 
-    var mv_r = mv;
+    var mv_r = mvFish;
     mv_r = mult( mv_r, translate ( -0.05, 0.0, 0.0 ) );;
     mv_r = mult(mv_r, rotateZ(90));
     mv_r = mult(mv_r, rotateX(-45 - 0.5 * rotTail));
@@ -204,8 +244,7 @@ function render()
 
     gl.uniformMatrix4fv(mvLoc, false, flatten(mv_r));
     gl.drawArrays( gl.TRIANGLES, NumBody+NumTail, NumFins );
- 
 
-
+    }
     window.requestAnimationFrame(render);
 }

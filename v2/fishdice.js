@@ -45,21 +45,7 @@ var box = [
 
 ];
 
-var v = [
-    vec3( -0.5, -0.5,  0.5 ),
-    vec3( -0.5,  0.5,  0.5 ),
-    vec3(  0.5,  0.5,  0.5 ),
-    vec3(  0.5, -0.5,  0.5 ),
-    vec3( -0.5, -0.5, -0.5 ),
-    vec3( -0.5,  0.5, -0.5 ),
-    vec3(  0.5,  0.5, -0.5 ),
-    vec3(  0.5, -0.5, -0.5 )
-];
 
-var lines = [ v[0], v[1], v[1], v[2], v[2], v[3], v[3], v[0],
-              v[4], v[5], v[5], v[6], v[6], v[7], v[7], v[4],
-              v[0], v[4], v[1], v[5], v[2], v[6], v[3], v[7]
-            ];
 
 
 var movement = false;     // Er m�sarhnappur ni�ri?
@@ -80,6 +66,9 @@ var proLoc;
 var mvLoc;
 var colorLoc;
 
+// Litur á fisk
+let fishColor = [ Math.random(), Math.random(), Math.random(), 1.0];
+
 
 window.onload = function init()
 {
@@ -99,13 +88,9 @@ window.onload = function init()
     var program = initShaders( gl, "vertex-shader", "fragment-shader" );
     gl.useProgram( program );
 
-    var boxBuffer = gl.createBuffer();
-    gl.bindBuffer( gl.ARRAY_BUFFER, boxBuffer );
-    gl.bufferData( gl.ARRAY_BUFFER, flatten(box), gl.STATIC_DRAW );
-
     var vBuffer = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, vBuffer );
-    gl.bufferData( gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW );
+    //gl.bufferData( gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW );
 
     var vPosition = gl.getAttribLocation( program, "vPosition" );
     gl.vertexAttribPointer( vPosition, 4, gl.FLOAT, false, 0, 0 );
@@ -166,53 +151,6 @@ window.onload = function init()
     render();
 }
 
-function renderFish(){
-    rotTail += incTail;
-    if( rotTail > 35.0  || rotTail < -35.0 )
-        incTail *= -1;
-
-	gl.uniform4fv( colorLoc, vec4(0.2, 0.6, 0.9, 1.0) );
-
-	// Teikna l�kama fisks (�n sn�nings)
-    gl.uniformMatrix4fv(mvLoc, false, flatten(mv));
-    gl.drawArrays( gl.TRIANGLES, 0, NumBody );
-
-    // Teikna spor� og sn�a honum
-	var mv_tail = mv;
-    mv_tail = mult( mv_tail, translate ( -0.5, 0.0, 0.0 ) );
-    mv_tail = mult( mv_tail, rotateY( rotTail ) );
-	mv_tail = mult( mv_tail, translate ( 0.5, 0.0, 0.0 ) );
-    gl.uniformMatrix4fv(mvLoc, false, flatten(mv_tail));
-    gl.drawArrays( gl.TRIANGLES, NumBody, NumTail );
-
-    var mv_l = mv;
-    mv_l = mult( mv_l, translate ( -0.05, 0.0, 0 ) );
-    mv_l = mult(mv_l, rotateZ(90));
-    mv_l = mult(mv_l, rotateX(45 + 0.5 * rotTail));
-	mv_l = mult( mv_l, translate ( 0.05, 0.0, 0 ) );
-
-    gl.uniformMatrix4fv(mvLoc, false, flatten(mv_l));
-    gl.drawArrays( gl.TRIANGLES, NumBody+NumTail, NumFins );
-
-    var mv_r = mv;
-    mv_r = mult( mv_r, translate ( -0.05, 0.0, 0.0 ) );;
-    mv_r = mult(mv_r, rotateZ(90));
-    mv_r = mult(mv_r, rotateX(-45 - 0.5 * rotTail));
-	mv_r = mult( mv_r, translate ( 0.05, 0.0, 0.0 ) );
-
-
-    gl.uniformMatrix4fv(mvLoc, false, flatten(mv_r));
-    gl.drawArrays( gl.TRIANGLES, NumBody+NumTail, NumFins );
-
-}
-
-function renderBox(){
-    //Box
-    gl.bufferData( gl.ARRAY_BUFFER, flatten(box), gl.STATIC_DRAW );
-    gl.uniform4fv( colorLoc, vec4(0.0, 0.0, 0.0, 1.0) );
-    gl.uniformMatrix4fv(mvLoc, false, flatten(mv));
-    gl.drawArrays(gl.LINE_STRIP, 0, 16);    
-}
 
 function render()
 {
@@ -222,13 +160,19 @@ function render()
     mv = mult( mv, rotateX(spinX) );
     mv = mult( mv, rotateY(spinY) );
 
+    gl.bufferData( gl.ARRAY_BUFFER, flatten(box), gl.STATIC_DRAW );
+    gl.uniform4fv( colorLoc, vec4(0.0, 0.0, 0.0, 1.0) );
+    gl.uniformMatrix4fv(mvLoc, false, flatten(mv));
+    gl.drawArrays(gl.LINE_STRIP, 0, 16);  
 
-    //Fiskur
+    // Fiskur
     rotTail += incTail;
     if( rotTail > 35.0  || rotTail < -35.0 )
         incTail *= -1;
+      
 
-	gl.uniform4fv( colorLoc, vec4(0.2, 0.6, 0.9, 1.0) );
+    gl.bufferData( gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW );
+	gl.uniform4fv(colorLoc, vec4(fishColor[0], fishColor[1], fishColor[2], 1.0));
 
 	// Teikna l�kama fisks (�n sn�nings)
     gl.uniformMatrix4fv(mvLoc, false, flatten(mv));
@@ -260,7 +204,8 @@ function render()
 
     gl.uniformMatrix4fv(mvLoc, false, flatten(mv_r));
     gl.drawArrays( gl.TRIANGLES, NumBody+NumTail, NumFins );
-    //renderFish();
-     
+ 
+
+
     window.requestAnimationFrame(render);
 }

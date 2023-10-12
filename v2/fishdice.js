@@ -99,9 +99,13 @@ window.onload = function init()
     var program = initShaders( gl, "vertex-shader", "fragment-shader" );
     gl.useProgram( program );
 
+    var boxBuffer = gl.createBuffer();
+    gl.bindBuffer( gl.ARRAY_BUFFER, boxBuffer );
+    gl.bufferData( gl.ARRAY_BUFFER, flatten(box), gl.STATIC_DRAW );
+
     var vBuffer = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, vBuffer );
-    gl.bufferData( gl.ARRAY_BUFFER, flatten(v), gl.STATIC_DRAW );
+    gl.bufferData( gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW );
 
     var vPosition = gl.getAttribLocation( program, "vPosition" );
     gl.vertexAttribPointer( vPosition, 4, gl.FLOAT, false, 0, 0 );
@@ -167,7 +171,6 @@ function renderFish(){
     if( rotTail > 35.0  || rotTail < -35.0 )
         incTail *= -1;
 
-    gl.bufferData( gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW );
 	gl.uniform4fv( colorLoc, vec4(0.2, 0.6, 0.9, 1.0) );
 
 	// Teikna l�kama fisks (�n sn�nings)
@@ -203,6 +206,14 @@ function renderFish(){
 
 }
 
+function renderBox(){
+    //Box
+    gl.bufferData( gl.ARRAY_BUFFER, flatten(box), gl.STATIC_DRAW );
+    gl.uniform4fv( colorLoc, vec4(0.0, 0.0, 0.0, 1.0) );
+    gl.uniformMatrix4fv(mvLoc, false, flatten(mv));
+    gl.drawArrays(gl.LINE_STRIP, 0, 16);    
+}
+
 function render()
 {
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -212,17 +223,44 @@ function render()
     mv = mult( mv, rotateY(spinY) );
 
 
-    //renderFish();
-   
-    gl.uniform4fv( colorLoc, vec4(1.0, 0.0, 0.0, 1.0) );
+    //Fiskur
+    rotTail += incTail;
+    if( rotTail > 35.0  || rotTail < -35.0 )
+        incTail *= -1;
+
+	gl.uniform4fv( colorLoc, vec4(0.2, 0.6, 0.9, 1.0) );
+
+	// Teikna l�kama fisks (�n sn�nings)
     gl.uniformMatrix4fv(mvLoc, false, flatten(mv));
-    gl.drawArrays( gl.LINES, 0, NumVertices );
-     // render Box
-     //gl.uniformMatrix4fv(mvLoc, false, flatten(mv));
-     //gl.uniform4fv(colorLoc, vec4(0.0, 0.0, 0.0, 1.0));
-     //gl.bindBuffer(gl.ARRAY_BUFFER, cubeBuffer);
-     //gl.vertexAttribPointer(vPosition, 4, gl.FLOAT, false, 0, 0);
-     //gl.drawArrays(gl.LINE_STRIP, 0, 16);
+    gl.drawArrays( gl.TRIANGLES, 0, NumBody );
+
+    // Teikna spor� og sn�a honum
+	var mv_tail = mv;
+    mv_tail = mult( mv_tail, translate ( -0.5, 0.0, 0.0 ) );
+    mv_tail = mult( mv_tail, rotateY( rotTail ) );
+	mv_tail = mult( mv_tail, translate ( 0.5, 0.0, 0.0 ) );
+    gl.uniformMatrix4fv(mvLoc, false, flatten(mv_tail));
+    gl.drawArrays( gl.TRIANGLES, NumBody, NumTail );
+
+    var mv_l = mv;
+    mv_l = mult( mv_l, translate ( -0.05, 0.0, 0 ) );
+    mv_l = mult(mv_l, rotateZ(90));
+    mv_l = mult(mv_l, rotateX(45 + 0.5 * rotTail));
+	mv_l = mult( mv_l, translate ( 0.05, 0.0, 0 ) );
+
+    gl.uniformMatrix4fv(mvLoc, false, flatten(mv_l));
+    gl.drawArrays( gl.TRIANGLES, NumBody+NumTail, NumFins );
+
+    var mv_r = mv;
+    mv_r = mult( mv_r, translate ( -0.05, 0.0, 0.0 ) );;
+    mv_r = mult(mv_r, rotateZ(90));
+    mv_r = mult(mv_r, rotateX(-45 - 0.5 * rotTail));
+	mv_r = mult( mv_r, translate ( 0.05, 0.0, 0.0 ) );
+
+
+    gl.uniformMatrix4fv(mvLoc, false, flatten(mv_r));
+    gl.drawArrays( gl.TRIANGLES, NumBody+NumTail, NumFins );
+    //renderFish();
      
     window.requestAnimationFrame(render);
 }

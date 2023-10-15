@@ -134,10 +134,10 @@ window.onload = function init()
      window.addEventListener("keydown", function(e){
          switch( e.keyCode ) {
             case 38:	// upp �r
-                zView += 0.2;
+                zView -= 0.2;
                 break;
             case 40:	// ni�ur �r
-                zView -= 0.2;
+                zView += 0.2;
                 break;
          }
      }  );  
@@ -154,28 +154,30 @@ window.onload = function init()
     render();
 }
 
-var fishData = []; // An array to store random fish positions and colors
+var fishData = []; 
 
-// Function to generate random fish positions and colors
+// Function fyrir random lit og átt
 function generateRandomFishData(numFish) {
-    fishData = []; // Clear the previous data
+    fishData = []; 
     for (var i = 0; i < numFish; i++) {
-        // Generate random x, y, and z positions within the cube
-        var x = Math.random() * 20 - 10; // Adjust as needed based on your cube size
-        var y = Math.random() * 20 - 10; // Adjust as needed based on your cube size
-        var z = Math.random() * 20 - 10; // Adjust as needed based on your cube size
         
-        // Generate a random color for the fish
+        var x = Math.random() * 20 - 10; 
+        var y = Math.random() * 20 - 10; 
+        var z = Math.random() * 20 - 10; 
+        
+
         var color = [Math.random(), Math.random(), Math.random(), 1.0];
         
-        fishData.push({ x, y, z, color });
+        var speed = 0.001 + Math.random() * 0.03;
+        
+        fishData.push({ x, y, z, color, speed });
     }
 }
 
-// Call the function to generate random fish positions and colors
-generateRandomFishData(100); // Generate 10 random fish positions and colors
 
-// Function to update fish positions
+generateRandomFishData(100); 
+
+
 function updateFishPositions() {
     for (var i = 0; i < fishData.length; i++) {
         var fish = fishData[i];
@@ -183,26 +185,34 @@ function updateFishPositions() {
         // Generate random direction vector
         if (!fish.direction) {
             fish.direction = vec3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5);
+            //fish.direction = vec3(2, 3, 0);
         }
 
-        // Normalize the direction vector to control the speed
         fish.direction = normalize(fish.direction);
 
-        // Update fish position based on the direction vector
-        var speed = 0.01; // Adjust the speed as needed
-        fish.x += speed * fish.direction[0];
-        fish.y += speed * fish.direction[1];
-        fish.z += speed * fish.direction[2];
+        fish.x += fish.speed * fish.direction[0];
+        fish.y += fish.speed * fish.direction[1];
+        fish.z += fish.speed * fish.direction[2];
         
-        // Wrap the fish around the scene if it goes outside the cube
-        if (fish.x > 10 || fish.x < -10 || fish.y > 10 || fish.y < -10 || fish.z > 10 || fish.z < -10) {
-            // Reset the fish's position and generate a new random direction
-            fish.x = Math.random() * 20 - 10;
-            fish.y = Math.random() * 20 - 10;
-            fish.z = Math.random() * 20 - 10;
-            fish.direction = vec3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5);
+
+        if (Math.abs(fish.x) >= 10) {
+            fish.x *= -1;
+        }
+        if (Math.abs(fish.y) >= 10) {
+            fish.y *= -1;
+        }
+        if (Math.abs(fish.z) >= 10) {
+            fish.z *= -1;
         }
     }
+}
+
+function unNaN(x) {
+    if (isNaN(x)) {
+        return 0;
+    }
+
+    return x;
 }
 
 function render()
@@ -229,53 +239,70 @@ function render()
         if( rotTail > 35.0  || rotTail < -35.0 )
             incTail *= -1;
 
-     for (var i = 0; i < fishData.length; i++) {
+    for (var i = 0; i < fishData.length; i++) {
         var fish = fishData[i];
         var mvFish = mv;
-        mvFish = mult(mvFish, translate(fish.x, fish.y, fish.z));
         
-        // Use the random color for the fish
+        // assume direction vector is normalized (normalize just in case)
+        var dir = normalize(fish.direction);
+        
+        var angleX = 0;
+        var angleY = Math.atan2(Math.sqrt(Math.pow(dir[0], 2) + Math.pow(dir[1], 2)), dir[2]);
+        var angleZ = Math.atan2(dir[1], dir[0]) * 180 / Math.PI;
+
+        angleX = unNaN(angleX);
+        angleY = unNaN(angleY);
+        angleZ = unNaN(angleZ);
+
+       
+
+        if (i==0) {
+            console.log(fish.direction, angleX, angleY, angleZ);
+        }
+
+        mvFish = mult(mvFish, translate(fish.x, fish.y, fish.z));
+
+ 
+        mvFish = mult(mvFish, rotateX(angleX));
+        mvFish = mult(mvFish, rotateY(angleY));
+        mvFish = mult(mvFish, rotateZ(angleZ));
+        
+        //Random litur fyrir fiska
         gl.bufferData(gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW);
         gl.uniform4fv(colorLoc, vec4(fish.color[0], fish.color[1], fish.color[2], fish.color[3]));
         
-        // Rest of the fish drawing code here...
         
-        // Modify the mv matrix with mvFish and draw the fish
+        // Teikna l�kama fisks (�n sn�nings)
         gl.uniformMatrix4fv(mvLoc, false, flatten(mvFish));
         gl.drawArrays(gl.TRIANGLES, 0, NumBody);
-    //gl.bufferData( gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW );
-	//gl.uniform4fv(colorLoc, vec4(fishColor[0], fishColor[1], fishColor[2], 1.0));
-
-	// Teikna l�kama fisks (�n sn�nings)
-    //gl.uniformMatrix4fv(mvLoc, false, flatten(mv));
-    //gl.drawArrays( gl.TRIANGLES, 0, NumBody );
-
-    // Teikna spor� og sn�a honum
-	var mv_tail = mvFish;
-    mv_tail = mult( mv_tail, translate ( -0.5, 0.0, 0.0 ) );
-    mv_tail = mult( mv_tail, rotateY( rotTail ) );
-	mv_tail = mult( mv_tail, translate ( 0.5, 0.0, 0.0 ) );
-    gl.uniformMatrix4fv(mvLoc, false, flatten(mv_tail));
-    gl.drawArrays( gl.TRIANGLES, NumBody, NumTail );
-
-    var mv_l = mvFish;
-    mv_l = mult( mv_l, translate ( -0.05, 0.0, 0 ) );
-    mv_l = mult(mv_l, rotateZ(90));
-    mv_l = mult(mv_l, rotateX(45 + 0.5 * rotTail));
-	mv_l = mult( mv_l, translate ( 0.05, 0.0, 0 ) );
-
-    gl.uniformMatrix4fv(mvLoc, false, flatten(mv_l));
-    gl.drawArrays( gl.TRIANGLES, NumBody+NumTail, NumFins );
-
-    var mv_r = mvFish;
-    mv_r = mult( mv_r, translate ( -0.05, 0.0, 0.0 ) );;
-    mv_r = mult(mv_r, rotateZ(90));
-    mv_r = mult(mv_r, rotateX(-45 - 0.5 * rotTail));
-	mv_r = mult( mv_r, translate ( 0.05, 0.0, 0.0 ) );
 
 
-    gl.uniformMatrix4fv(mvLoc, false, flatten(mv_r));
-    gl.drawArrays( gl.TRIANGLES, NumBody+NumTail, NumFins );
+        // Teikna spor� og sn�a honum
+        var mv_tail = mvFish;
+        mv_tail = mult( mv_tail, translate ( -0.5, 0.0, 0.0 ) );
+        mv_tail = mult( mv_tail, rotateY( rotTail ) );
+        mv_tail = mult( mv_tail, translate ( 0.5, 0.0, 0.0 ) );
+        gl.uniformMatrix4fv(mvLoc, false, flatten(mv_tail));
+        gl.drawArrays( gl.TRIANGLES, NumBody, NumTail );
+
+        var mv_l = mvFish;
+        mv_l = mult( mv_l, translate ( -0.05, 0.0, 0 ) );
+        mv_l = mult(mv_l, rotateZ(90));
+        mv_l = mult(mv_l, rotateX(45 + 0.5 * rotTail));
+        mv_l = mult( mv_l, translate ( 0.05, 0.0, 0 ) );
+
+        gl.uniformMatrix4fv(mvLoc, false, flatten(mv_l));
+        gl.drawArrays( gl.TRIANGLES, NumBody+NumTail, NumFins );
+
+        var mv_r = mvFish;
+        mv_r = mult( mv_r, translate ( -0.05, 0.0, 0.0 ) );;
+        mv_r = mult(mv_r, rotateZ(90));
+        mv_r = mult(mv_r, rotateX(-45 - 0.5 * rotTail));
+        mv_r = mult( mv_r, translate ( 0.05, 0.0, 0.0 ) );
+
+
+        gl.uniformMatrix4fv(mvLoc, false, flatten(mv_r));
+        gl.drawArrays( gl.TRIANGLES, NumBody+NumTail, NumFins );
 
     }
     window.requestAnimationFrame(render);

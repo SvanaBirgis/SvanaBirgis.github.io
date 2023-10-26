@@ -111,13 +111,20 @@ var texCoords = [
     vec2(10.0, 1.0),
     vec2(0.0, 1.0),
     vec2(0.0, 0.0),
-
     // veggur 4
     vec2(0.0, 0.0),
     vec2(10.0, 0.0),
     vec2(10.0, 1.0),
     vec2(10.0, 1.0),
     vec2(0.0, 1.0),
+    vec2(0.0, 0.0),
+
+    // Mynsturhnit fyrir þak
+    vec2(0.0, 0.0),
+    vec2(10.0, 0.0),
+    vec2(10.0, 10.0),
+    vec2(10.0, 10.0),
+    vec2(0.0, 10.0),
     vec2(0.0, 0.0),
 // Mynsturhnit fyrir gólf
     vec2(  0.0,  0.0 ),

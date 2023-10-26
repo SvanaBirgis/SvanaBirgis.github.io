@@ -7,13 +7,28 @@ var gl;
 var numVertices = 36;
 
 var points = [];
-var colors = [];
+let normalsArray = [];
 
 var movement = false;     // Do we rotate?
 var spinX = 0;
 var spinY = 0;
 var origX;
 var origY;
+let zDist = -3.0;
+
+const fovy = 50.0;
+const near = 0.2;
+const far = 100.0;
+
+var lightPosition = vec4(1.0, 1.0, 1.0, 0.0 );
+var lightAmbient = vec4(0.2, 0.2, 0.2, 1.0 );
+var lightDiffuse = vec4( 1.0, 1.0, 1.0, 1.0 );
+var lightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
+
+var materialAmbient = vec4( 1.0, 0.0, 1.0, 1.0 );
+var materialDiffuse = vec4( 1.0, 0.8, 0.0, 1.0 );
+var materialSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
+var materialShininess = 150.0;
 
 var matrixLoc;
 
@@ -23,12 +38,21 @@ window.onload = function init() {
     gl = WebGLUtils.setupWebGL(canvas);
     if (!gl) { alert("WebGL isn't available"); }
 
-    colorCube();
-
     gl.viewport(0, 0, canvas.width, canvas.height);
     gl.clearColor(1.0, 1.0, 1.0, 1.0);
 
     gl.enable(gl.DEPTH_TEST);
+    gl.depthFunc(gl.LEQUAL);
+
+    var dypi = gl.getParameter(gl.DEPTH_BITS);
+    var gildi = gl.getParameter(gl.DEPTH_CLEAR_VALUE);
+    var bil = gl.getParameter(gl.DEPTH_RANGE);
+
+    ambientProduct = mult(lightAmbient, materialAmbient);
+    diffuseProduct = mult(lightDiffuse, materialDiffuse);
+    specularProduct = mult(lightSpecular, materialSpecular);
+
+    normalCube();
 
     //
     //  Load shaders and initialize attribute buffers
@@ -36,13 +60,13 @@ window.onload = function init() {
     var program = initShaders(gl, "vertex-shader", "fragment-shader");
     gl.useProgram(program);
 
-    var cBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, cBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, flatten(colors), gl.STATIC_DRAW);
+    var nBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, nBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, flatten(normalsArray), gl.STATIC_DRAW);
 
-    var vColor = gl.getAttribLocation(program, "vColor");
-    gl.vertexAttribPointer(vColor, 4, gl.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(vColor);
+    var vNormal = gl.getAttribLocation(program, "vNormal");
+    gl.vertexAttribPointer(vNormal, 4, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(vNormal);
 
     var vBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
@@ -51,6 +75,25 @@ window.onload = function init() {
     var vPosition = gl.getAttribLocation(program, "vPosition");
     gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(vPosition);
+
+    let projectionMatrix = perspective(fovy, 1.0, near, far);
+    gl.uniformMatrix4fv( gl.getUniformLocation(program, "projectionMatrix"), false, flatten(projectionMatrix));
+    normalMatrixLoc = gl.getUniformLocation( program, "normalMatrix" );
+
+    
+    modelViewMatrixLoc = gl.getUniformLocation( program, "modelViewMatrix" );
+    projectionMatrixLoc = gl.getUniformLocation( program, "projectionMatrix" );
+    normalMatrixLoc = gl.getUniformLocation( program, "normalMatrix" );
+
+    projectionMatrix = perspective( fovy, 1.0, near, far );
+    gl.uniformMatrix4fv(projectionMatrixLoc, false, flatten(projectionMatrix) );
+
+    
+    gl.uniform4fv( gl.getUniformLocation(program, "ambientProduct"), flatten(ambientProduct) );
+    gl.uniform4fv( gl.getUniformLocation(program, "diffuseProduct"), flatten(diffuseProduct) );
+    gl.uniform4fv( gl.getUniformLocation(program, "specularProduct"), flatten(specularProduct) );	
+    gl.uniform4fv( gl.getUniformLocation(program, "lightPosition"), flatten(lightPosition) );
+    gl.uniform1f( gl.getUniformLocation(program, "shininess"), materialShininess );
 
     matrixLoc = gl.getUniformLocation(program, "rotation");
 
@@ -74,40 +117,46 @@ window.onload = function init() {
             origY = e.offsetY;
         }
     });
+    // Event listener for mousewheel
+    window.addEventListener("wheel", function(e){
+        if( e.deltaY > 0.0 ) {
+            zDist += 0.2;
+        } else {
+            zDist -= 0.2;
+        }
+    }  ); 
 
     render();
 }
 
-function colorCube() {
-    quad(1, 0, 3, 2);
-    quad(2, 3, 7, 6);
-    quad(3, 0, 4, 7);
-    quad(6, 5, 1, 2);
-    quad(4, 5, 6, 7);
-    quad(5, 4, 0, 1);
+function normalCube() {
+    quad( 1, 0, 3, 2, 0 );
+    quad( 2, 3, 7, 6, 1 );
+    quad( 3, 0, 4, 7, 2 );
+    quad( 6, 5, 1, 2, 3 );
+    quad( 4, 5, 6, 7, 4 );
+    quad( 5, 4, 0, 1, 5 );
 }
 
-function quad(a, b, c, d) {
+function quad(a, b, c, d, n) {
     var vertices = [
-        vec3(-0.5, -0.5, 0.5),
-        vec3(-0.5, 0.5, 0.5),
-        vec3(0.5, 0.5, 0.5),
-        vec3(0.5, -0.5, 0.5),
-        vec3(-0.5, -0.5, -0.5),
-        vec3(-0.5, 0.5, -0.5),
-        vec3(0.5, 0.5, -0.5),
-        vec3(0.5, -0.5, -0.5)
+        vec4( -0.5, -0.5,  0.5, 1.0 ),
+        vec4( -0.5,  0.5,  0.5, 1.0 ),
+        vec4(  0.5,  0.5,  0.5, 1.0 ),
+        vec4(  0.5, -0.5,  0.5, 1.0 ),
+        vec4( -0.5, -0.5, -0.5, 1.0 ),
+        vec4( -0.5,  0.5, -0.5, 1.0 ),
+        vec4(  0.5,  0.5, -0.5, 1.0 ),
+        vec4(  0.5, -0.5, -0.5, 1.0 )
     ];
 
-    var vertexColors = [
-        [0.0, 0.0, 0.0, 1.0],  // black
-        [1.0, 0.0, 0.0, 1.0],  // red
-        [1.0, 1.0, 0.0, 1.0],  // yellow
-        [0.0, 1.0, 0.0, 1.0],  // green
-        [0.0, 0.0, 1.0, 1.0],  // blue
-        [1.0, 0.0, 1.0, 1.0],  // magenta
-        [0.0, 1.0, 1.0, 1.0],  // cyan
-        [1.0, 1.0, 1.0, 1.0]   // white
+    var faceNormals = [
+        vec4( 0.0, 0.0,  1.0, 0.0 ),  // front
+        vec4(  1.0, 0.0, 0.0, 0.0 ),  // right
+        vec4( 0.0, -1.0, 0.0, 0.0 ),  // down
+        vec4( 0.0,  1.0, 0.0, 0.0 ),  // up
+        vec4( 0.0, 0.0, -1.0, 0.0 ),  // back
+        vec4( -1.0, 0.0, 0.0, 0.0 )   // left
     ];
 
     //vertex color assigned by the index of the vertex
@@ -115,7 +164,7 @@ function quad(a, b, c, d) {
 
     for (var i = 0; i < indices.length; ++i) {
         points.push(vertices[indices[i]]);
-        colors.push(vertexColors[a]);
+        normals.push(faceNormals[n]);
 
     }
 }
@@ -127,6 +176,15 @@ function render() {
     var mv = mat4();
     mv = mult(mv, rotateX(spinX));
     mv = mult(mv, rotateY(spinY));
+
+    normalMatrix = [
+        vec3(mv[0][0], mv[0][1], mv[0][2]),
+        vec3(mv[1][0], mv[1][1], mv[1][2]),
+        vec3(mv[2][0], mv[2][1], mv[2][2])
+    ];
+    normalMatrix.matrix = true;
+
+    gl.uniformMatrix3fv(normalMatrixLoc, false, flatten(normalMatrix) );
 
     // First the front left leg
     mv1 = mult(mv, translate(-0.4, 0.0, -0.325));
@@ -160,4 +218,3 @@ function render() {
     
     requestAnimFrame(render);
 }
-

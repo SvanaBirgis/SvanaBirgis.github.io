@@ -5,23 +5,30 @@
         <title> Dæmi 1 </title>
         <script id="vertex-shader" type="x-shader/x-vertex">
             attribute vec4 vPosition;
-
-            void 
-            main()
+            attribute vec4 vColour;
+            varying vec4 fColour;
+      
+            uniform mat4 modelViewMatrix;
+            uniform mat4 projectionMatrix;
+      
+            void main()
             {
-                gl_Position = vPosition;
+                fColour = vColour;
+                gl_Position = projectionMatrix * modelViewMatrix * vPosition;
             }
-        </script>
+          </script>
 
-        <script id="fragment-shader" type="x-shader/x-fragment">
+          <script id="fragment-shader" type="x-shader/x-fragment">
+
             precision mediump float;
-            
-            void
-            main()
+      
+            varying  vec4 fColour;
+      
+            void main()
             {
-                gl_FragColor = vec4( 1.0, 0.0, 0.0, 1.0 );
+                gl_FragColor = fColour;
             }
-        </script>
+          </script>
 
         <script type="text/javascript" src="/../Common/webgl-utils.js"></script>
         <script type="text/javascript" src="/../Common/initshaders.js"></script>
